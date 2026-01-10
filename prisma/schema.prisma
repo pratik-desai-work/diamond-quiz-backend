@@ -1,0 +1,78 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Note that some adapters may set a maximum length for the String type by default, please ensure your strings are long
+// enough when changing adapters.
+// See https://www.prisma.io/docs/orm/reference/prisma-schema-reference#string for more information
+
+datasource db {
+  provider = "sqlite"
+  url = "file:dev.sqlite"
+}
+
+model Session {
+  id String @id
+  shop String
+  state String
+  isOnline Boolean @default(false)
+  scope String?
+  expires DateTime?
+  accessToken String
+  userId BigInt?
+  firstName String?
+  lastName String?
+  email String?
+  accountOwner Boolean @default(false)
+  locale String?
+  collaborator Boolean? @default(false)
+  emailVerified Boolean? @default(false)
+  refreshToken String?
+  refreshTokenExpires DateTime?
+}
+
+model Quiz {
+  id        Int      @id @default(autoincrement())
+  shop      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  questions Question[]
+}
+
+model Question {
+  id          Int      @id @default(autoincrement())
+  quizId      Int
+  key         String   // Unique identifier like "settingStyle", "metal", etc.
+  title       String
+  type        String   // e.g., "select" for multiple choice, "budget" for range, "priority" for special selects
+  description String?
+
+  // Fields specific to certain types, e.g., budget
+  min         Int?
+  suggestions Json?    // Array of suggested values, e.g., [2000, 3500, 5000]
+
+  quiz        Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  options     Option[]
+}
+
+model Option {
+  id           Int      @id @default(autoincrement())
+  questionId   Int
+  value        String
+  label        String
+  image        String?
+  description  String?
+  icon         String?
+  upgrade      Boolean?
+  karats       Json?    // Array of karat options, e.g., [{ "value": "14k", "label": "14K White Gold" }]
+  extra        Json?    // Extra info object, e.g., { "title": "...", "content": "..." }
+  highlight    Boolean?
+  diamondImage String?
+  specs        Json?    // Specs object, e.g., { "carat": "1.5", "color": "J" }
+
+  question     Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+}
