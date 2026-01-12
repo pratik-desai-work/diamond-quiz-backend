@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useAppBridge } from '@shopify/app-bridge-react';
-import { addOptionToQuestion, addQuestionToQuiz, deleteOption, deleteQuestion, getOrCreateQuiz, updateOption, updateQuestion } from 'app/models/quiz.server';
+import { addOptionToQuestion, addQuestionToQuiz, deleteOption, deleteQuestion, getOrCreateQuiz, toggleQuestionActive, updateOption, updateQuestion } from 'app/models/quiz.server';
 import { authenticate } from 'app/shopify.server';
 import { useLoaderData } from 'react-router';
 import { EditableQuestionHeader } from 'app/components/quiz/editable_question_headder';
@@ -18,7 +18,7 @@ export async function loader({ request , params }: any) {
     };
   }
 
-  return await getOrCreateQuiz('demo-shop.myshopify.com');
+  return await getOrCreateQuiz();
 }
 
 export async function action({ request }: any) {
@@ -72,6 +72,13 @@ export async function action({ request }: any) {
     });
   }
 
+  if (intent === "toggle-question") {
+    await toggleQuestionActive(
+      Number(formData.get("questionId")),
+      formData.get("active") === "true"
+    );
+  }
+
   return null;
 }
 
@@ -111,6 +118,7 @@ export default function QuizDashboard() {
                 <EditableOptionRow
                   isNew
                   questionId={q.id}
+                  onCancel={() => setAddingOptionFor(null)}
                 />
               ) : (
                 <s-button onClick={() => setAddingOptionFor(q.id)}>
@@ -128,6 +136,7 @@ export default function QuizDashboard() {
             quizId={quiz.id} 
             index={quiz.questions.length}
             question={{}}
+            onCancel={() => setAddingQuestion(false)}
           />
         ) : (
           <s-button variant="primary" onClick={() => setAddingQuestion(true)}>

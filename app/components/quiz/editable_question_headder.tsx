@@ -1,83 +1,84 @@
 import { useRef, useState } from "react";
+import { useFetcher } from "react-router";
 
 export function EditableQuestionHeader({
   question,
   index,
   isNew = false,
   quizId,
+  onCancel,
 }: any) {
-  const [editing, setEditing] = useState(isNew);
-  const formRef = useRef<HTMLFormElement>(null);
-  const intentRef = useRef<HTMLInputElement>(null);
+  const fetcher = useFetcher();
+  const isSubmitting = fetcher.state !== "idle";
 
-  const modalId = `delete-question-${question?.id}`;
+  const [editing, setEditing] = useState(isNew);
+  const intentRef = useRef<HTMLInputElement>(null);
 
   if (!editing) {
     return (
-      <form ref={formRef} method="post">
+      <fetcher.Form method="post">
         <input ref={intentRef} type="hidden" name="intent" />
         <input type="hidden" name="questionId" value={question.id} />
+        <input type="hidden" name="active" />
 
-        <s-stack>
-          <s-grid gridTemplateColumns="1fr auto" alignItems="center">
-            <s-heading>
-              Question {index + 1}: {question.title}
-            </s-heading>
+        <s-grid gridTemplateColumns="1fr auto">
+          <s-heading>
+            Question {index + 1}: {question.title}
+          </s-heading>
 
-            {/* EDIT + DELETE */}
-            <s-stack direction="inline" gap="small-100">
-              <s-button type="button" icon="edit" onClick={() => setEditing(true)} />
-
-              <s-button
-                tone="critical"
-                icon="delete"
-                commandFor={modalId}
-                command="--show"
+          <s-stack direction="inline" gap="small-100">
+            <s-switch
+              checked={question.active}
+              disabled={isSubmitting}
+              label={question.active ? "Active" : "Inactive"}
+              onChange={(event: any) => {
+                intentRef.current!.value = "toggle-question";
+                fetcher.submit(
+                  {
+                    intent: "toggle-question",
+                    questionId: question.id,
+                    active: String(event.target.checked),
+                  },
+                  { method: "post" }
+                );
+              }}
             />
-            </s-stack>
-          </s-grid>
 
-          {question.description && (
-            <s-text>{question.description}</s-text>
-          )}
-        </s-stack>
+            <s-button
+              icon="edit"
+              disabled={isSubmitting}
+              onClick={() => setEditing(true)}
+            />
 
-        {/* DELETE CONFIRM MODAL */}
-        <s-modal id={modalId} heading="Delete question">
-          <s-stack gap="base">
-            <s-text>
-              Are you sure you want to delete this question? All its options will
-              also be deleted.
-            </s-text>
-
-            <s-stack direction="inline" gap="base" alignItems="end">
+            {index > 5 && (
               <s-button
-                commandFor={modalId}
-                command="--hide"
-              >
-                Cancel
-              </s-button>
-
-              <s-button
+                icon="delete"
                 tone="critical"
+                disabled={isSubmitting}
                 onClick={() => {
-                  intentRef.current!.value = "delete-question";
-                  formRef.current!.submit();
+                  if (!window.confirm("Delete this question and all its options?"))
+                    return;
+                  fetcher.submit(
+                    {
+                      intent: "delete-question",
+                      questionId: question.id,
+                    },
+                    { method: "post" }
+                  );
                 }}
-              >
-                Delete
-              </s-button>
-            </s-stack>
+              />
+            )}
           </s-stack>
-        </s-modal>
-      </form>
+        </s-grid>
+
+        {question.description && <s-text>{question.description}</s-text>}
+      </fetcher.Form>
     );
   }
 
   return (
-    <form ref={formRef} method="post">
+    <fetcher.Form method="post">
       <input ref={intentRef} type="hidden" name="intent" />
-
       {isNew && <input type="hidden" name="quizId" value={quizId} />}
       {!isNew && (
         <input type="hidden" name="questionId" value={question.id} />
@@ -101,35 +102,33 @@ export function EditableQuestionHeader({
         />
 
         <s-stack direction="inline" gap="base">
-          {/* SAVE */}
           <s-button
             variant="primary"
+            loading={isSubmitting}
+            disabled={isSubmitting}
             onClick={() => {
               intentRef.current!.value = isNew
                 ? "add-question"
                 : "update-question";
-              formRef.current!.submit();
             }}
           >
             {isNew ? "Add Question" : "Save"}
           </s-button>
 
-          {/* DELETE */}
-          {!isNew && (
-            <s-button
-              tone="critical"
-              onClick={() => {
-                intentRef.current!.value = "delete-question";
-                formRef.current!.submit();
-              }}
-            >
-              Delete
-            </s-button>
-          )}
-
-          <s-button onClick={() => setEditing(false)}>Cancel</s-button>
+          <s-button
+            disabled={isSubmitting}
+            onClick={() => {
+              if (isNew) {
+                onCancel?.();
+              } else {
+                setEditing(false);
+              }
+            }}
+          >
+            Cancel
+          </s-button>
         </s-stack>
       </s-stack>
-    </form>
+    </fetcher.Form>
   );
 }

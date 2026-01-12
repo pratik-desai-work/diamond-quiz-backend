@@ -35,25 +35,34 @@ model Session {
 }
 
 model Quiz {
-  id        Int      @id @default(autoincrement())
-  shop      String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          Int      @id @default(autoincrement())
 
-  questions Question[]
+  owner       String
+  title       String
+  subtitle    String
+  description String
+  ctaText     String
+  note        String
+  image       String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  questions   Question[]
 }
 
 model Question {
   id          Int      @id @default(autoincrement())
   quizId      Int
-  key         String   // Unique identifier like "settingStyle", "metal", etc.
+  key         String
   title       String
-  type        String   // e.g., "select" for multiple choice, "budget" for range, "priority" for special selects
+  type        String
   description String?
 
-  // Fields specific to certain types, e.g., budget
   min         Int?
-  suggestions Json?    // Array of suggested values, e.g., [2000, 3500, 5000]
+  suggestions Json?
+
+  active      Boolean  @default(true)   // ✅ NEW
 
   quiz        Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
   options     Option[]

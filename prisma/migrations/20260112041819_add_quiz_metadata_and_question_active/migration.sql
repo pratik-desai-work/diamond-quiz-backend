@@ -22,7 +22,13 @@ CREATE TABLE "Session" (
 -- CreateTable
 CREATE TABLE "Quiz" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    "shop" TEXT NOT NULL,
+    "owner" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "subtitle" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
+    "ctaText" TEXT NOT NULL,
+    "note" TEXT NOT NULL,
+    "image" TEXT,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" DATETIME NOT NULL
 );
@@ -37,6 +43,7 @@ CREATE TABLE "Question" (
     "description" TEXT,
     "min" INTEGER,
     "suggestions" JSONB,
+    "active" BOOLEAN NOT NULL DEFAULT true,
     CONSTRAINT "Question_quizId_fkey" FOREIGN KEY ("quizId") REFERENCES "Quiz" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
@@ -57,6 +64,3 @@ CREATE TABLE "Option" (
     "specs" JSONB,
     CONSTRAINT "Option_questionId_fkey" FOREIGN KEY ("questionId") REFERENCES "Question" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
-
--- CreateIndex
-CREATE UNIQUE INDEX "Quiz_shop_key" ON "Quiz"("shop");

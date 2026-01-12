@@ -7,6 +7,7 @@ export const defaultQuestions = [
     type: "select",
     description: null,
     min: null,
+    active: true,
     suggestions: null,
     options: [
       {
@@ -46,6 +47,7 @@ export const defaultQuestions = [
     type: "select",
     description: null,
     min: null,
+    active: true,
     suggestions: null,
     options: [
       {
@@ -75,6 +77,7 @@ export const defaultQuestions = [
     description:
       "They are both the same, Natural diamonds are formed deep within the Earth, while lab diamonds are created in a lab",
     min: null,
+    active: true,
     suggestions: null,
     options: [
       {
@@ -105,6 +108,7 @@ export const defaultQuestions = [
     type: "select",
     description: null,
     min: null,
+    active: true,
     suggestions: null,
     options: [
       {
@@ -130,6 +134,7 @@ export const defaultQuestions = [
     type: "budget",
     description: null,
     min: 1700,
+    active: true,
     suggestions: [2000, 3500, 5000],
     options: [], // no options for budget type
   },
@@ -140,6 +145,7 @@ export const defaultQuestions = [
     type: "select",
     description: null,
     min: null,
+    active: true,
     suggestions: null,
     options: [
       {

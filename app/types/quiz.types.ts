@@ -6,6 +6,7 @@ export type DefaultQuestionInput = {
   description?: string | null;
   min?: number | null;
   suggestions?: number[] | null;
+  active?: boolean;
   options: DefaultOptionInput[];
 };
 
@@ -52,6 +53,7 @@ export interface QuizQuestion {
   description?: string | null;
   min?: number | null;
   suggestions?: number[] | null;
+  active?: boolean;
   options: QuizOption[];
   sortOrder?: number; // if you decide to add ordering later
 }
