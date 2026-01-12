@@ -1,21 +1,25 @@
 // app/routes/app.quiz.tsx
 
-import { useState } from "react";
-import { useAppBridge } from "@shopify/app-bridge-react";
+import { useEffect, useState } from "react";
 import {
   addOptionToQuestion,
   addQuestionToQuiz,
   deleteOption,
   deleteQuestion,
   getOrCreateQuiz,
+  reorderQuestions,
   toggleQuestionActive,
   updateOption,
   updateQuestion,
 } from "app/models/quiz.server";
 import { authenticate } from "app/shopify.server";
-import { useLoaderData } from "react-router";
+import { useFetcher, useLoaderData, useNavigation } from "react-router";
+
 import { EditableQuestionHeader } from "app/components/quiz/editable_question_headder";
 import { EditableOptionRow } from "app/components/quiz/editable_option_row";
+import { DraggableQuestion } from "app/components/quiz/draggable_question";
+
+/* ---------------- loader ---------------- */
 
 export async function loader({ request, params }: any) {
   await authenticate.admin(request);
@@ -26,6 +30,8 @@ export async function loader({ request, params }: any) {
 
   return await getOrCreateQuiz();
 }
+
+/* ---------------- action ---------------- */
 
 export async function action({ request }: any) {
   const formData = await request.formData();
@@ -67,7 +73,6 @@ export async function action({ request }: any) {
   }
 
   if (intent === "add-question") {
-    console.log("Adding new question")
     await addQuestionToQuiz(Number(formData.get("quizId")), {
       key: String(formData.get("key")),
       title: String(formData.get("title")),
@@ -86,13 +91,56 @@ export async function action({ request }: any) {
     );
   }
 
+  if (intent === "reorder-questions") {
+    const quizId = Number(formData.get("quizId"));
+    const orderedIds = JSON.parse(
+      String(formData.get("orderedIds"))
+    ) as number[];
+
+    await reorderQuestions(quizId, orderedIds);
+  }
+
   return null;
 }
 
+/* ---------------- COMPONENT ---------------- */
+
 export default function QuizDashboard() {
   const quiz: any = useLoaderData();
+  const reorderFetcher = useFetcher();
+  const navigation = useNavigation();
+  const isLoading = navigation.state === "loading";
+
+  const [questions, setQuestions] = useState<any[]>([]);
   const [addingQuestion, setAddingQuestion] = useState(false);
   const [addingOptionFor, setAddingOptionFor] = useState<number | null>(null);
+
+  /* keep local state in sync with loader */
+  useEffect(() => {
+    if (quiz?.questions) {
+      setQuestions(quiz.questions);
+    }
+  }, [quiz]);
+
+  function moveQuestion(from: number, to: number) {
+    setQuestions((prev) => {
+      const updated = [...prev];
+      const [moved] = updated.splice(from, 1);
+      updated.splice(to, 0, moved);
+      return updated;
+    });
+  }
+
+  function persistOrder() {
+    reorderFetcher.submit(
+      {
+        intent: "reorder-questions",
+        quizId: quiz.id,
+        orderedIds: JSON.stringify(questions.map((q) => q.id)),
+      },
+      { method: "post", action: "." }
+    );
+  }
 
   if (!quiz) {
     return (
@@ -103,46 +151,60 @@ export default function QuizDashboard() {
       </s-page>
     );
   }
+  if (isLoading) {
+    return (
+      <s-page heading="Diamond Quiz Builder">
+        <s-banner tone="warning">
+          <s-text>Loading...</s-text>
+        </s-banner>
+      </s-page>
+    );
+  }
 
   return (
     <s-page heading="Diamond Quiz Builder">
       <s-stack gap="base">
-        {quiz.questions.map((q: any) => (
-          <s-box
+        {questions.map((q: any, index: number) => (
+          <DraggableQuestion
             key={q.id}
-            border="base"
-            background="subdued"
-            borderRadius="base"
-            padding="base"
+            index={index}
+            moveQuestion={moveQuestion}
+            onDrop={persistOrder}  // ✅ SAVE ORDER ON DROP
           >
-            <s-stack gap="base">
-              <EditableQuestionHeader question={q} />
+            {/* UI UNCHANGED */}
+            <s-box
+              border="base"
+              background="subdued"
+              borderRadius="base"
+              padding="base"
+            >
+              <s-stack gap="base">
+                <EditableQuestionHeader question={q} />
 
-              {q.options.map((opt: any) => (
-                <EditableOptionRow
-                  key={opt.id}
-                  option={opt}
-                  questionId={q.id}
-                />
-              ))}
+                {q.options.map((opt: any) => (
+                  <EditableOptionRow
+                    key={opt.id}
+                    option={opt}
+                    questionId={q.id}
+                  />
+                ))}
 
-              {/* ADD OPTION */}
-              {addingOptionFor === q.id ? (
-                <EditableOptionRow
-                  isNew
-                  questionId={q.id}
-                  onCancel={() => setAddingOptionFor(null)}
-                />
-              ) : (
-                <s-button onClick={() => setAddingOptionFor(q.id)}>
-                  Add option
-                </s-button>
-              )}
-            </s-stack>
-          </s-box>
+                {addingOptionFor === q.id ? (
+                  <EditableOptionRow
+                    isNew
+                    questionId={q.id}
+                    onCancel={() => setAddingOptionFor(null)}
+                  />
+                ) : (
+                  <s-button onClick={() => setAddingOptionFor(q.id)}>
+                    Add option
+                  </s-button>
+                )}
+              </s-stack>
+            </s-box>
+          </DraggableQuestion>
         ))}
 
-        {/* ADD QUESTION */}
         {addingQuestion ? (
           <EditableQuestionHeader
             isNew
@@ -151,7 +213,7 @@ export default function QuizDashboard() {
             onCancel={() => setAddingQuestion(false)}
           />
         ) : (
-          <s-button variant="primary" onClick={() => setAddingQuestion(true)}>
+          <s-button variant="primary" onClick={() => setAddingQuestion(true)} disabled={isLoading} >
             Add Question
           </s-button>
         )}

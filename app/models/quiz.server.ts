@@ -307,3 +307,20 @@ export async function deleteQuestion(questionId: number): Promise<void> {
   });
 }
 
+/** Reorder questions
+ */
+
+export async function reorderQuestions(
+  quizId: number,
+  orderedIds: number[]
+) {
+  await prisma.$transaction(
+    orderedIds.map((id, index) =>
+      prisma.question.update({
+        where: { id },
+        data: { order: index + 1 }, // ✅ 1-based order
+      })
+    )
+  );
+}
+
