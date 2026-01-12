@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useFetcher } from "react-router";
 
 export function EditableOptionRow({
@@ -8,107 +8,117 @@ export function EditableOptionRow({
   onCancel,
 }: any) {
   const fetcher = useFetcher();
+  const formRef = useRef<HTMLFormElement>(null);
+  const submittedRef = useRef(false);
+
   const isSubmitting = fetcher.state !== "idle";
 
   const [editing, setEditing] = useState(isNew);
-  const [imageUrl, setImageUrl] = useState(option?.image || "");
+  const [imageUrl, setImageUrl] = useState(option?.image ?? "");
 
-  const intentRef = useRef<HTMLInputElement>(null);
+  /* ✅ close + cleanup after submit */
+  useEffect(() => {
+    if (fetcher.state === "idle" && submittedRef.current) {
+      submittedRef.current = false;
 
-  /* ----------------------------------
-     VIEW MODE (ONLY FOR EXISTING OPTION)
-  ----------------------------------- */
+      formRef.current?.reset();
+      setImageUrl("");
+
+      if (isNew) {
+        onCancel?.(); // 🔥 unmount add-option form
+      } else {
+        setEditing(false);
+      }
+    }
+  }, [fetcher.state, isNew, onCancel]);
+
+  /* ---------- VIEW MODE ---------- */
   if (!editing && option?.id) {
     return (
       <s-box padding="base" background="base" borderRadius="small">
-        <fetcher.Form method="post">
-          <input ref={intentRef} type="hidden" name="intent" />
-          <input type="hidden" name="optionId" value={option.id} />
-
-          <s-grid gridTemplateColumns="1fr auto" alignItems="center" gap="base">
-            <s-stack direction="inline" gap="base" alignItems="center">
-              {option.image && (
-                <img
-                  src={option.image}
-                  alt=""
-                  style={{
-                    width: 45,
-                    height: 45,
-                    objectFit: "cover",
-                    borderRadius: 8,
-                  }}
-                />
-              )}
-
-              <s-stack gap="small-100">
-                <s-stack direction="inline" gap="small-100" alignItems="center">
-                  <s-badge>{option.label}</s-badge>
-                  <s-text>{option.value}</s-text>
-                </s-stack>
-                {option.description && (
-                  <s-text tone="neutral">{option.description}</s-text>
-                )}
-              </s-stack>
-            </s-stack>
-
-            <s-stack direction="inline" gap="small-100">
-              <s-button
-                type="button"
-                icon="edit"
-                disabled={isSubmitting}
-                onClick={() => setEditing(true)}
-              />
-
-              <s-button
-                icon="delete"
-                tone="critical"
-                disabled={isSubmitting}
-                onClick={() => {
-                  if (!window.confirm("Delete this option?")) return;
-                  intentRef.current!.value = "delete-option";
-                  fetcher.submit(
-                    { intent: "delete-option", optionId: option.id },
-                    { method: "post" }
-                  );
+        <s-grid gridTemplateColumns="1fr auto" alignItems="center" gap="base">
+          <s-stack direction="inline" gap="base" alignItems="center">
+            {option.image && (
+              <img
+                src={option.image}
+                alt=""
+                style={{
+                  width: 45,
+                  height: 45,
+                  objectFit: "cover",
+                  borderRadius: 8,
                 }}
               />
+            )}
+
+            <s-stack gap="small-100">
+              <s-stack direction="inline" gap="small-100" alignItems="center">
+                <s-badge>{option.label}</s-badge>
+                <s-text>{option.value}</s-text>
+              </s-stack>
+
+              {option.description && (
+                <s-text tone="neutral">{option.description}</s-text>
+              )}
             </s-stack>
-          </s-grid>
-        </fetcher.Form>
+          </s-stack>
+
+          <s-stack direction="inline" gap="small-100">
+            <s-button icon="edit" onClick={() => setEditing(true)} />
+
+            <s-button
+              icon="delete"
+              tone="critical"
+              onClick={() => {
+                if (!window.confirm("Delete this option?")) return;
+
+                fetcher.submit(
+                  {
+                    intent: "delete-option",
+                    optionId: option.id,
+                  },
+                  { method: "post", action: "." }
+                );
+              }}
+            />
+          </s-stack>
+        </s-grid>
       </s-box>
     );
   }
 
-  /* ------------------------
-     EDIT MODE (NEW + EXISTING)
-  ------------------------- */
+  /* ---------- EDIT / ADD MODE ---------- */
   return (
     <s-box padding="base" border="base" borderRadius="small">
-      <fetcher.Form method="post">
-        <input ref={intentRef} type="hidden" name="intent" />
-        <input type="hidden" name="optionId" value={option?.id || ""} />
+      <fetcher.Form ref={formRef} method="post" action=".">
+        <input
+          type="hidden"
+          name="intent"
+          value={isNew ? "add-option" : "update-option"}
+        />
         <input type="hidden" name="questionId" value={questionId} />
+        <input type="hidden" name="optionId" value={option?.id ?? ""} />
         <input type="hidden" name="image" value={imageUrl} />
 
         <s-stack gap="base">
           <s-text-field
             name="label"
             label="Label"
-            defaultValue={option?.label || ""}
+            defaultValue={option?.label ?? ""}
             required
           />
 
           <s-text-field
             name="value"
             label="Value"
-            defaultValue={option?.value || ""}
+            defaultValue={option?.value ?? ""}
             required
           />
 
           <s-text-area
             name="description"
             label="Description"
-            defaultValue={option?.description || ""}
+            defaultValue={option?.description ?? ""}
           />
 
           <s-stack gap="small-100">
@@ -150,37 +160,22 @@ export function EditableOptionRow({
             <s-button
               variant="primary"
               loading={isSubmitting}
-              disabled={isSubmitting}
               onClick={() => {
-                intentRef.current!.value = isNew
-                  ? "add-option"
-                  : "update-option";
+                submittedRef.current = true;
+                formRef.current && fetcher.submit(formRef.current);
               }}
             >
               {isNew ? "Add option" : "Save"}
             </s-button>
 
-            {!isNew && (
-              <s-button
-                tone="critical"
-                disabled={isSubmitting}
-                onClick={() => {
-                  if (!window.confirm("Delete this option?")) return;
-                  intentRef.current!.value = "delete-option";
-                }}
-              >
-                Delete
-              </s-button>
-            )}
-
             <s-button
               disabled={isSubmitting}
               onClick={() => {
-                if (isNew) {
-                  onCancel?.();
-                } else {
-                  setEditing(false);
-                }
+                formRef.current?.reset();
+                setImageUrl("");
+
+                if (isNew) onCancel?.();
+                else setEditing(false);
               }}
             >
               Cancel

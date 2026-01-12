@@ -1,21 +1,27 @@
 // app/routes/app.quiz.tsx
 
-import { useEffect, useState } from 'react';
-import { useAppBridge } from '@shopify/app-bridge-react';
-import { addOptionToQuestion, addQuestionToQuiz, deleteOption, deleteQuestion, getOrCreateQuiz, toggleQuestionActive, updateOption, updateQuestion } from 'app/models/quiz.server';
-import { authenticate } from 'app/shopify.server';
-import { useLoaderData } from 'react-router';
-import { EditableQuestionHeader } from 'app/components/quiz/editable_question_headder';
-import { EditableOptionRow } from 'app/components/quiz/editable_option_row';
+import { useState } from "react";
+import { useAppBridge } from "@shopify/app-bridge-react";
+import {
+  addOptionToQuestion,
+  addQuestionToQuiz,
+  deleteOption,
+  deleteQuestion,
+  getOrCreateQuiz,
+  toggleQuestionActive,
+  updateOption,
+  updateQuestion,
+} from "app/models/quiz.server";
+import { authenticate } from "app/shopify.server";
+import { useLoaderData } from "react-router";
+import { EditableQuestionHeader } from "app/components/quiz/editable_question_headder";
+import { EditableOptionRow } from "app/components/quiz/editable_option_row";
 
-export async function loader({ request , params }: any) {
-  const { admin } = await authenticate.admin(request);
+export async function loader({ request, params }: any) {
+  await authenticate.admin(request);
 
   if (params.id === "new") {
-    return {
-      destination: "product",
-      title: "",
-    };
+    return { destination: "product", title: "" };
   }
 
   return await getOrCreateQuiz();
@@ -61,6 +67,7 @@ export async function action({ request }: any) {
   }
 
   if (intent === "add-question") {
+    console.log("Adding new question")
     await addQuestionToQuiz(Number(formData.get("quizId")), {
       key: String(formData.get("key")),
       title: String(formData.get("title")),
@@ -82,21 +89,17 @@ export async function action({ request }: any) {
   return null;
 }
 
-
 export default function QuizDashboard() {
-  const app = useAppBridge();
-  const quiz = useLoaderData();
+  const quiz: any = useLoaderData();
   const [addingQuestion, setAddingQuestion] = useState(false);
   const [addingOptionFor, setAddingOptionFor] = useState<number | null>(null);
 
   if (!quiz) {
     return (
       <s-page heading="Diamond Quiz Builder">
-        <s-section>
-          <s-banner tone="warning" >
-            <s-text>Default quiz not initialized yet.</s-text>
-          </s-banner>
-        </s-section>
+        <s-banner tone="warning">
+          <s-text>Default quiz not initialized yet.</s-text>
+        </s-banner>
       </s-page>
     );
   }
@@ -104,16 +107,26 @@ export default function QuizDashboard() {
   return (
     <s-page heading="Diamond Quiz Builder">
       <s-stack gap="base">
-        {quiz.questions.map((q: any, index: number) => (
-          <s-box key={q.id} border="base" background='subdued' borderRadius="base" padding="base">
+        {quiz.questions.map((q: any) => (
+          <s-box
+            key={q.id}
+            border="base"
+            background="subdued"
+            borderRadius="base"
+            padding="base"
+          >
             <s-stack gap="base">
-              <EditableQuestionHeader question={q} index={index} />
+              <EditableQuestionHeader question={q} />
 
               {q.options.map((opt: any) => (
-                <EditableOptionRow key={opt.id} option={opt} questionId={q.id} />
+                <EditableOptionRow
+                  key={opt.id}
+                  option={opt}
+                  questionId={q.id}
+                />
               ))}
 
-              {/* INLINE ADD OPTION */}
+              {/* ADD OPTION */}
               {addingOptionFor === q.id ? (
                 <EditableOptionRow
                   isNew
@@ -129,12 +142,11 @@ export default function QuizDashboard() {
           </s-box>
         ))}
 
-        {/* INLINE ADD QUESTION */}
+        {/* ADD QUESTION */}
         {addingQuestion ? (
           <EditableQuestionHeader
             isNew
-            quizId={quiz.id} 
-            index={quiz.questions.length}
+            quizId={quiz.id}
             question={{}}
             onCancel={() => setAddingQuestion(false)}
           />

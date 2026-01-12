@@ -37,6 +37,7 @@ CREATE TABLE "Quiz" (
 CREATE TABLE "Question" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     "quizId" INTEGER NOT NULL,
+    "order" INTEGER NOT NULL,
     "key" TEXT NOT NULL,
     "title" TEXT NOT NULL,
     "type" TEXT NOT NULL,

@@ -7,6 +7,7 @@ export type DefaultQuestionInput = {
   min?: number | null;
   suggestions?: number[] | null;
   active?: boolean;
+  order?: number;
   options: DefaultOptionInput[];
 };
 
@@ -47,6 +48,8 @@ export interface QuizOption {
 
 export interface QuizQuestion {
   id?: number;
+  quizId: number;
+  order: number;
   key: string;
   title: string;
   type: "select" | "budget" | string;
@@ -59,8 +62,14 @@ export interface QuizQuestion {
 }
 
 export interface Quiz {
-  id: number;
-  shop: string;
+   id: number;
+  owner: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  ctaText: string;
+  note: string;
+  image?: string | null;
   createdAt: Date;
   updatedAt: Date;
   questions: QuizQuestion[];

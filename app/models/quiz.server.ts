@@ -4,6 +4,11 @@ import prisma from "../db.server";
 import { defaultQuestions } from "../utils/default-quiz";
 import type { DefaultOptionInput } from "app/types/quiz.types";
 import { Prisma, type Quiz, type Question, type Option } from "@prisma/client";
+import shopify  from "app/shopify.server";
+import {
+  STAGED_UPLOADS_CREATE,
+  FILE_CREATE,
+} from "app/utils/graphql/graphql-queries";
 
 /**
  * Quiz with questions and options
@@ -22,7 +27,7 @@ export async function getOrCreateQuiz(): Promise<QuizWithQuestions> {
     include: {
       questions: {
         include: { options: true },
-        orderBy: { id: "asc" },
+        orderBy: { order: "asc" }, // ✅ IMPORTANT
       },
     },
   });
@@ -39,7 +44,7 @@ export async function getOrCreateQuiz(): Promise<QuizWithQuestions> {
  */
 export async function createDefaultQuiz(): Promise<QuizWithQuestions> {
   return prisma.$transaction(async (tx) => {
-    // 1️⃣ Create quiz metadata
+    // 1️⃣ Create quiz
     const quiz = await tx.quiz.create({
       data: {
         owner: "Axe",
@@ -55,12 +60,14 @@ export async function createDefaultQuiz(): Promise<QuizWithQuestions> {
     });
 
     // 2️⃣ Create default questions
-    for (const defaultQ of defaultQuestions) {
+    for (let index = 0; index < defaultQuestions.length; index++) {
+      const defaultQ = defaultQuestions[index];
       const { options, ...questionData } = defaultQ;
 
       const question = await tx.question.create({
         data: {
           quizId: quiz.id,
+          order: index + 1, // ✅ QUESTION NUMBER
           key: questionData.key,
           title: questionData.title,
           type: questionData.type,
@@ -74,7 +81,7 @@ export async function createDefaultQuiz(): Promise<QuizWithQuestions> {
         },
       });
 
-      // 3️⃣ Create options (if any)
+      // 3️⃣ Create options
       if (options?.length) {
         await tx.option.createMany({
           data: options.map((opt) => ({
@@ -87,13 +94,10 @@ export async function createDefaultQuiz(): Promise<QuizWithQuestions> {
             upgrade: opt.upgrade ?? null,
             highlight: opt.highlight ?? null,
             diamondImage: opt.diamondImage ?? null,
-
             karats:
               opt.karats != null ? [...opt.karats] : Prisma.JsonNull,
-
             extra:
               opt.extra != null ? { ...opt.extra } : Prisma.JsonNull,
-
             specs:
               opt.specs != null ? { ...opt.specs } : Prisma.JsonNull,
           })),
@@ -107,7 +111,7 @@ export async function createDefaultQuiz(): Promise<QuizWithQuestions> {
       include: {
         questions: {
           include: { options: true },
-          orderBy: { id: "asc" },
+          orderBy: { order: "asc" }, // ✅ IMPORTANT
         },
       },
     });
@@ -115,14 +119,14 @@ export async function createDefaultQuiz(): Promise<QuizWithQuestions> {
 }
 
 /**
- * Get quiz WITHOUT auto-create (optional helper)
+ * Get quiz WITHOUT auto-create
  */
 export async function getQuiz(): Promise<QuizWithQuestions | null> {
   return prisma.quiz.findFirst({
     include: {
       questions: {
         include: { options: true },
-        orderBy: { id: "asc" },
+        orderBy: { order: "asc" },
       },
     },
   });
@@ -172,7 +176,7 @@ export async function toggleQuestionActive(
 }
 
 /**
- * Add a new question to quiz
+ * Add a new question to quiz (AUTO ORDER)
  */
 export async function addQuestionToQuiz(
   quizId: number,
@@ -185,9 +189,18 @@ export async function addQuestionToQuiz(
     suggestions?: readonly number[] | null;
   }
 ): Promise<Question> {
+  const lastQuestion = await prisma.question.findFirst({
+    where: { quizId },
+    orderBy: { order: "desc" },
+    select: { order: true },
+  });
+
+  const nextOrder = (lastQuestion?.order ?? 0) + 1;
+
   return prisma.question.create({
     data: {
       quizId,
+      order: nextOrder, // ✅ AUTO INCREMENT
       key: data.key,
       title: data.title,
       type: data.type,
@@ -220,21 +233,18 @@ export async function updateOption(
       upgrade: data.upgrade ?? undefined,
       highlight: data.highlight ?? undefined,
       diamondImage: data.diamondImage ?? undefined,
-
       karats:
         data.karats === undefined
           ? undefined
           : data.karats === null
           ? Prisma.JsonNull
           : [...data.karats],
-
       extra:
         data.extra === undefined
           ? undefined
           : data.extra === null
           ? Prisma.JsonNull
           : { ...data.extra },
-
       specs:
         data.specs === undefined
           ? undefined
@@ -263,13 +273,10 @@ export async function addOptionToQuestion(
       upgrade: option.upgrade ?? null,
       highlight: option.highlight ?? null,
       diamondImage: option.diamondImage ?? null,
-
       karats:
         option.karats != null ? [...option.karats] : Prisma.JsonNull,
-
       extra:
         option.extra != null ? { ...option.extra } : Prisma.JsonNull,
-
       specs:
         option.specs != null ? { ...option.specs } : Prisma.JsonNull,
     },
@@ -299,3 +306,4 @@ export async function deleteQuestion(questionId: number): Promise<void> {
     });
   });
 }
+
