@@ -1,128 +1,135 @@
-  // app/models/quiz.server.ts
-  import { DefaultOptionInput } from "app/types/quiz.types";
-import prisma from "../db.server"; // adjust path if needed
-  import { defaultQuestions } from "../utils/default-quiz";
-  import { type Quiz, type Question, type Option, Prisma } from "@prisma/client";
+// app/models/quiz.server.ts
 
-  // Optional: more specific type with included relations
-  export type QuizWithQuestions = Quiz & {
-    questions: (Question & {
-      options: Option[];
-    })[];
-  };
+import prisma from "../db.server";
+import { defaultQuestions } from "../utils/default-quiz";
+import type { DefaultOptionInput } from "app/types/quiz.types";
+import { Prisma, type Quiz, type Question, type Option } from "@prisma/client";
 
+/**
+ * Quiz with questions and options
+ */
+export type QuizWithQuestions = Quiz & {
+  questions: (Question & {
+    options: Option[];
+  })[];
+};
 
-  /**
-   * Get quiz for a shop or create it with default questions if it doesn't exist
-   */
-  export async function getOrCreateQuiz(shop: string): Promise<QuizWithQuestions> {
-    let quiz = await prisma.quiz.findUnique({
-      where: { shop },
-      include: {
-        questions: {
-          include: {
-            options: true,
-          },
-          orderBy: {
-            id: "asc", // ← later you can change to sortOrder
-          },
-        },
+/**
+ * Get the single quiz or create it with default data
+ */
+export async function getOrCreateQuiz(): Promise<QuizWithQuestions> {
+  let quiz = await prisma.quiz.findFirst({
+    include: {
+      questions: {
+        include: { options: true },
+        orderBy: { id: "asc" },
+      },
+    },
+  });
+
+  if (!quiz) {
+    quiz = await createDefaultQuiz();
+  }
+
+  return quiz;
+}
+
+/**
+ * Create default quiz with metadata + default questions
+ */
+export async function createDefaultQuiz(): Promise<QuizWithQuestions> {
+  return prisma.$transaction(async (tx) => {
+    // 1️⃣ Create quiz metadata
+    const quiz = await tx.quiz.create({
+      data: {
+        owner: "Axe",
+        title: "Diamond",
+        subtitle: "QUIZ",
+        description:
+          "Answer a few simple questions and we’ll help you discover the diamond that fits you best.",
+        ctaText: "Let’s start",
+        note: "Takes less than 2 minutes",
+        image:
+          "https://images.pexels.com/photos/30852236/pexels-photo-30852236.jpeg",
       },
     });
 
-    if (!quiz) {
-      quiz = await createDefaultQuizForShop(shop);
+    // 2️⃣ Create default questions
+    for (const defaultQ of defaultQuestions) {
+      const { options, ...questionData } = defaultQ;
+
+      const question = await tx.question.create({
+        data: {
+          quizId: quiz.id,
+          key: questionData.key,
+          title: questionData.title,
+          type: questionData.type,
+          description: questionData.description ?? null,
+          min: questionData.min ?? null,
+          suggestions:
+            questionData.suggestions != null
+              ? [...questionData.suggestions]
+              : Prisma.JsonNull,
+          active: questionData.active ?? true,
+        },
+      });
+
+      // 3️⃣ Create options (if any)
+      if (options?.length) {
+        await tx.option.createMany({
+          data: options.map((opt) => ({
+            questionId: question.id,
+            value: opt.value,
+            label: opt.label,
+            image: opt.image ?? null,
+            description: opt.description ?? null,
+            icon: opt.icon ?? null,
+            upgrade: opt.upgrade ?? null,
+            highlight: opt.highlight ?? null,
+            diamondImage: opt.diamondImage ?? null,
+
+            karats:
+              opt.karats != null ? [...opt.karats] : Prisma.JsonNull,
+
+            extra:
+              opt.extra != null ? { ...opt.extra } : Prisma.JsonNull,
+
+            specs:
+              opt.specs != null ? { ...opt.specs } : Prisma.JsonNull,
+          })),
+        });
+      }
     }
 
-    return quiz;
-  }
-
-  /**
-   * Create a new quiz with all default questions and options for a shop
-   */
-  export async function createDefaultQuizForShop(shop: string): Promise<QuizWithQuestions> {
-    return prisma.$transaction(async (tx) => {
-      // 1. Create the Quiz record
-      const quiz = await tx.quiz.create({
-        data: {
-          shop,
-        },
-      });
-
-      // 2. Create all default questions
-      for (const defaultQ of defaultQuestions) {
-        const { options, ...questionData } = defaultQ;
-
-        const question = await tx.question.create({
-          data: {
-            quizId: quiz.id,
-            key: questionData.key,
-            title: questionData.title,
-            type: questionData.type,
-            description: questionData.description ?? null,
-            min: questionData.min ?? null,
-            suggestions:
-    questionData.suggestions != null
-      ? [...questionData.suggestions] // remove readonly
-      : Prisma.JsonNull
-          },
-        });
-
-        // 3. Create options if they exist
-        if (options && options.length > 0) {
-          await tx.option.createMany({
-            data: options.map((opt) => ({
-              questionId: question.id,
-              value: opt.value,
-              label: opt.label,
-              image: opt.image ?? null,
-              description: opt.description ?? null,
-              icon: opt.icon ?? null,
-              upgrade: opt.upgrade ?? null,
-              karats: opt.karats != null ? [...opt.karats] : Prisma.JsonNull,
-              extra: opt.extra != null ? { ...opt.extra } : Prisma.JsonNull,
-              specs: opt.specs != null ? { ...opt.specs } : Prisma.JsonNull,
-              highlight: opt.highlight ?? null,
-              diamondImage: opt.diamondImage ?? null,
-            })),
-          });
-        }
-      }
-
-      // 4. Return the freshly created quiz with all relations
-      return tx.quiz.findUniqueOrThrow({
-        where: { id: quiz.id },
-        include: {
-          questions: {
-            include: {
-              options: true,
-            },
-            orderBy: { id: "asc" },
-          },
-        },
-      });
-    });
-  }
-
-  /**
-   * Get quiz without auto-creating if it doesn't exist
-   */
-  export async function getQuiz(shop: string): Promise<QuizWithQuestions | null> {
-    return prisma.quiz.findUnique({
-      where: { shop },
+    // 4️⃣ Return full quiz
+    return tx.quiz.findUniqueOrThrow({
+      where: { id: quiz.id },
       include: {
         questions: {
-          include: {
-            options: true,
-          },
+          include: { options: true },
           orderBy: { id: "asc" },
         },
       },
     });
-  }
+  });
+}
 
 /**
- * Update a question by ID
+ * Get quiz WITHOUT auto-create (optional helper)
+ */
+export async function getQuiz(): Promise<QuizWithQuestions | null> {
+  return prisma.quiz.findFirst({
+    include: {
+      questions: {
+        include: { options: true },
+        orderBy: { id: "asc" },
+      },
+    },
+  });
+}
+
+/**
+ * Update a question
  */
 export async function updateQuestion(
   questionId: number,
@@ -131,7 +138,7 @@ export async function updateQuestion(
     description?: string | null;
     type?: string;
     min?: number | null;
-    suggestions?: readonly string[] | null;
+    suggestions?: readonly number[] | null;
   }
 ): Promise<Question> {
   return prisma.question.update({
@@ -152,7 +159,51 @@ export async function updateQuestion(
 }
 
 /**
- * Update an option by ID
+ * Toggle question active/inactive
+ */
+export async function toggleQuestionActive(
+  questionId: number,
+  active: boolean
+): Promise<Question> {
+  return prisma.question.update({
+    where: { id: questionId },
+    data: { active },
+  });
+}
+
+/**
+ * Add a new question to quiz
+ */
+export async function addQuestionToQuiz(
+  quizId: number,
+  data: {
+    key: string;
+    title: string;
+    type: string;
+    description?: string | null;
+    min?: number | null;
+    suggestions?: readonly number[] | null;
+  }
+): Promise<Question> {
+  return prisma.question.create({
+    data: {
+      quizId,
+      key: data.key,
+      title: data.title,
+      type: data.type,
+      description: data.description ?? null,
+      min: data.min ?? null,
+      suggestions:
+        data.suggestions != null
+          ? [...data.suggestions]
+          : Prisma.JsonNull,
+      active: true,
+    },
+  });
+}
+
+/**
+ * Update option
  */
 export async function updateOption(
   optionId: number,
@@ -195,38 +246,7 @@ export async function updateOption(
 }
 
 /**
- * Add a new question to a quiz
- */
-export async function addQuestionToQuiz(
-  quizId: number,
-  data: {
-    key: string;
-    title: string;
-    type: string;
-    description?: string | null;
-    min?: number | null;
-    suggestions?: readonly string[] | null;
-  }
-): Promise<Question> {
-  return prisma.question.create({
-    data: {
-      quizId,
-      key: data.key,
-      title: data.title,
-      type: data.type,
-      description: data.description ?? null,
-      min: data.min ?? null,
-      suggestions:
-        data.suggestions == null
-          ? Prisma.JsonNull
-          : [...data.suggestions],
-    },
-  });
-}
-
-
-/**
- * Add a new option to a question
+ * Add option to question
  */
 export async function addOptionToQuestion(
   questionId: number,
@@ -257,7 +277,7 @@ export async function addOptionToQuestion(
 }
 
 /**
- * Delete an option by ID
+ * Delete option
  */
 export async function deleteOption(optionId: number): Promise<Option> {
   return prisma.option.delete({
@@ -266,16 +286,14 @@ export async function deleteOption(optionId: number): Promise<Option> {
 }
 
 /**
- * Delete a question and all its options
+ * Delete question (and its options)
  */
 export async function deleteQuestion(questionId: number): Promise<void> {
   await prisma.$transaction(async (tx) => {
-    // 1. Delete options first
     await tx.option.deleteMany({
       where: { questionId },
     });
 
-    // 2. Delete the question
     await tx.question.delete({
       where: { id: questionId },
     });
