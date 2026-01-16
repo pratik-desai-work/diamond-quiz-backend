@@ -19,7 +19,7 @@ export type QuizWithQuestions = Quiz & {
   })[];
 };
 
-/**
+/**  
  * Get the single quiz or create it with default data
  */
 export async function getOrCreateQuiz(): Promise<QuizWithQuestions> {
@@ -305,5 +305,87 @@ export async function deleteQuestion(questionId: number): Promise<void> {
       where: { id: questionId },
     });
   });
+}
+
+/** Reorder questions
+ */
+
+export async function reorderQuestions(
+  quizId: number,
+  orderedIds: number[]
+) {
+  await prisma.$transaction(
+    orderedIds.map((id, index) =>
+      prisma.question.update({
+        where: { id },
+        data: { order: index + 1 }, // ✅ 1-based order
+      })
+    )
+  );
+}
+
+/**
+ * Upload image to Shopify and return MediaImage GID + preview URL
+ */
+export async function uploadImageToShopify(
+  admin: any,
+  file: File
+): Promise<{ mediaId: string; previewUrl: string }> {
+  const stagedRes = await admin.graphql(STAGED_UPLOADS_CREATE, {
+    variables: {
+      input: [
+        {
+          resource: "FILE",
+          filename: file.name,
+          mimeType: file.type,
+          fileSize: file.size.toString(),
+          httpMethod: "POST",
+        },
+      ],
+    },
+  });
+
+  const stagedJson = await stagedRes.json();
+  const target = stagedJson?.data?.stagedUploadsCreate?.stagedTargets?.[0];
+
+  if (!target) {
+    throw new Error("Staged upload creation failed");
+  }
+
+  const form = new FormData();
+  target.parameters.forEach((p: any) => form.append(p.name, p.value));
+  form.append("file", file);
+
+  const uploadRes = await fetch(target.url, {
+    method: "POST",
+    body: form,
+  });
+
+  if (!uploadRes.ok) {
+    throw new Error("Failed to upload file to Shopify storage");
+  }
+
+  const fileCreateRes = await admin.graphql(FILE_CREATE, {
+    variables: {
+      files: [
+        {
+          originalSource: target.resourceUrl,
+          contentType: "IMAGE",
+        },
+      ],
+    },
+  });
+
+  const json = await fileCreateRes.json();
+  const media = json?.data?.fileCreate?.files?.[0];
+
+  if (!media || media.__typename !== "MediaImage") {
+    throw new Error("MediaImage creation failed");
+  }
+
+  return {
+    mediaId: media.id,          // store in DB
+    previewUrl: target.resourceUrl, // use for UI preview
+  };
 }
 
