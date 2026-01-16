@@ -17,17 +17,14 @@ mutation stagedUploadsCreate($input: [StagedUploadInput!]!) {
 }
 `;
 
-
 export const FILE_CREATE = `
 mutation fileCreate($files: [FileCreateInput!]!) {
   fileCreate(files: $files) {
     files {
-      id
-      url
-    }
-    userErrors {
-      field
-      message
+      __typename
+      ... on MediaImage {
+        id
+      }
     }
   }
 }

@@ -4,38 +4,48 @@ import { useFetcher } from "react-router";
 export function EditableOptionRow({
   option,
   isNew = false,
+  isActive,
   questionId,
   onCancel,
 }: any) {
-  const fetcher = useFetcher();
+  const saveFetcher = useFetcher();
+  const uploadFetcher = useFetcher();
+
   const formRef = useRef<HTMLFormElement>(null);
   const submittedRef = useRef(false);
 
-  const isSubmitting = fetcher.state !== "idle";
+  const isSaving = saveFetcher.state !== "idle";
+  const isUploading = uploadFetcher.state !== "idle";
 
   const [editing, setEditing] = useState(isNew);
   const [imageUrl, setImageUrl] = useState(option?.image ?? "");
 
-  /* ✅ close + cleanup after submit */
+  /* ✅ close + cleanup after save */
   useEffect(() => {
-    if (fetcher.state === "idle" && submittedRef.current) {
+    if (saveFetcher.state === "idle" && submittedRef.current) {
       submittedRef.current = false;
 
-      formRef.current?.reset();
-      setImageUrl("");
-
       if (isNew) {
-        onCancel?.(); // 🔥 unmount add-option form
+        formRef.current?.reset();
+        setImageUrl("");
+        onCancel?.();
       } else {
         setEditing(false);
       }
     }
-  }, [fetcher.state, isNew, onCancel]);
+  }, [saveFetcher.state, isNew, onCancel]);
+
+  /* ✅ handle image upload response */
+  useEffect(() => { 
+    if (uploadFetcher.data?.imageUrl) {
+      setImageUrl(uploadFetcher.data.imageUrl);
+    }
+  }, [uploadFetcher.data]);
 
   /* ---------- VIEW MODE ---------- */
   if (!editing && option?.id) {
     return (
-      <s-box padding="base" background="base" borderRadius="small">
+      <s-box padding="base" background={isActive ? "base" : "transparent" } border={isActive ? "none" : "base strong"} borderRadius="small">
         <s-grid gridTemplateColumns="1fr auto" alignItems="center" gap="base">
           <s-stack direction="inline" gap="base" alignItems="center">
             {option.image && (
@@ -55,6 +65,7 @@ export function EditableOptionRow({
               <s-stack direction="inline" gap="small-100" alignItems="center">
                 <s-badge>{option.label}</s-badge>
                 <s-text>{option.value}</s-text>
+                <s-text>{String(isActive)}</s-text>
               </s-stack>
 
               {option.description && (
@@ -72,7 +83,7 @@ export function EditableOptionRow({
               onClick={() => {
                 if (!window.confirm("Delete this option?")) return;
 
-                fetcher.submit(
+                saveFetcher.submit(
                   {
                     intent: "delete-option",
                     optionId: option.id,
@@ -90,7 +101,7 @@ export function EditableOptionRow({
   /* ---------- EDIT / ADD MODE ---------- */
   return (
     <s-box padding="base" border="base" borderRadius="small">
-      <fetcher.Form ref={formRef} method="post" action=".">
+      <saveFetcher.Form ref={formRef} method="post" action=".">
         <input
           type="hidden"
           name="intent"
@@ -121,8 +132,9 @@ export function EditableOptionRow({
             defaultValue={option?.description ?? ""}
           />
 
+          {/* IMAGE UPLOAD (replaced URL input) */}
           <s-stack gap="small-100">
-            <s-text>Image URL</s-text>
+            <s-text>Image</s-text>
 
             {imageUrl && (
               <img
@@ -137,52 +149,67 @@ export function EditableOptionRow({
               />
             )}
 
-            <s-grid gridTemplateColumns="1fr auto" gap="base">
-              <input
-                type="text"
-                value={imageUrl}
-                placeholder="https://example.com/image.png"
-                onChange={(e) => setImageUrl(e.target.value)}
-              />
+            <input
+              type="file"
+              accept="image/*"
+              disabled={isUploading || isSaving}
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
 
-              {imageUrl && (
-                <s-button
-                  icon="x"
-                  tone="critical"
-                  disabled={isSubmitting}
-                  onClick={() => setImageUrl("")}
-                />
-              )}
-            </s-grid>
+                const fd = new FormData();
+                fd.append("intent", "upload-option-image");
+                fd.append("file", file);
+
+                uploadFetcher.submit(fd, {
+                  method: "post",
+                  action: ".",
+                  encType: "multipart/form-data",
+                });
+              }}
+            />
+
+            {isUploading && (
+              <s-text tone="success">Uploading image…</s-text>
+            )}
+
+            {imageUrl && (
+              <s-button
+                icon="x"
+                tone="critical"
+                disabled={isSaving || isUploading}
+                onClick={() => setImageUrl("")}
+              />
+            )}
           </s-stack>
 
+          {/* ACTIONS */}
           <s-stack direction="inline" gap="base">
             <s-button
               variant="primary"
-              loading={isSubmitting}
+              loading={isSaving}
+              disabled={isUploading}
               onClick={() => {
                 submittedRef.current = true;
-                formRef.current && fetcher.submit(formRef.current);
+                saveFetcher.submit(formRef.current!);
               }}
             >
               {isNew ? "Add option" : "Save"}
             </s-button>
 
             <s-button
-              disabled={isSubmitting}
+              disabled={isSaving || isUploading}
               onClick={() => {
                 formRef.current?.reset();
                 setImageUrl("");
-
-                if (isNew) onCancel?.();
-                else setEditing(false);
+                isNew ? onCancel?.() : setEditing(false);
               }}
             >
               Cancel
             </s-button>
           </s-stack>
         </s-stack>
-      </fetcher.Form>
+      </saveFetcher.Form>
     </s-box>
   );
 }
