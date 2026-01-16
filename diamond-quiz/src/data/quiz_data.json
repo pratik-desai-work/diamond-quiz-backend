@@ -1,0 +1,262 @@
+{
+    "intro": {
+        "owner": "Axe",
+        "title": "Diamond",
+        "subtitle": "QUIZ",
+        "description": "Answer a few simple questions and we’ll help you discover the diamond that fits you best.",
+        "ctaText": "let’s start",
+        "note": "Takes less than 2 minutes",
+        "image": "https://images.pexels.com/photos/30852236/pexels-photo-30852236.jpeg"
+    },
+
+    "redirect": {
+        "url": "/results",
+        "paramMap": {
+            "settingStyle": "setting",
+            "metal": "metal",
+            "metalKarat": "karat",
+            "origin": "origin",
+            "shape": "shape",
+            "budget": "budget",
+            "priority": "priority"
+        }
+    },
+
+    "steps": ["settingStyle", "metal", "origin", "shape", "budget", "priority"],
+
+    "questions": {
+        "settingStyle": {
+            "title": "Choose the setting's style",
+            "options": [
+                {
+                    "value": "solitaire",
+                    "label": "Solitaire",
+                    "image": "https://images.pexels.com/photos/9953654/pexels-photo-9953654.jpeg",
+                    "description": "A timeless single diamond elevated by delicate prongs."
+                },
+                {
+                    "value": "halo",
+                    "label": "Halo",
+                    "image": "https://images.pexels.com/photos/9953654/pexels-photo-9953654.jpeg",
+                    "description": "A sparkling circle of diamonds surrounds the center stone."
+                },
+                {
+                    "value": "threeStone",
+                    "label": "Three-Stone",
+                    "image": "https://images.pexels.com/photos/15491851/pexels-photo-15491851.jpeg",
+                    "description": "Three diamonds symbolizing your past, present, and future."
+                },
+                {
+                    "value": "vintage",
+                    "label": "Vintage",
+                    "image": "https://images.pexels.com/photos/9953654/pexels-photo-9953654.jpeg",
+                    "description": "Intricate milgrain and filigree inspired by antique eras."
+                },
+                {
+                    "value": "pave",
+                    "label": "Pavé",
+                    "image": "https://images.pexels.com/photos/8398936/pexels-photo-8398936.jpeg",
+                    "description": "Tiny diamonds pave the band for maximum brilliance."
+                },
+                {
+                    "value": "cathedral",
+                    "label": "Cathedral",
+                    "image": "https://images.pexels.com/photos/16702313/pexels-photo-16702313.jpeg",
+                    "description": "Elegant arches rise to support the center diamond."
+                },
+                {
+                    "value": "bezel",
+                    "label": "Bezel",
+                    "image": "https://images.pexels.com/photos/31367645/pexels-photo-31367645.jpeg",
+                    "description": "A smooth metal rim securely embraces the diamond."
+                }
+            ]
+        },
+
+        "metal": {
+            "title": "Choose the metal",
+            "options": [
+                {
+                    "value": "whiteGold",
+                    "label": "White Gold",
+                    "image": "https://images.pexels.com/photos/18451698/pexels-photo-18451698.jpeg",
+                    "description": "Modern, bright, and rhodium-plated for lasting shine.",
+                    "karats": [
+                        { "value": "14k", "label": "14K White Gold" },
+                        {
+                            "value": "18k",
+                            "label": "18K White Gold",
+                            "upgrade": true
+                        }
+                    ]
+                },
+                {
+                    "value": "yellowGold",
+                    "label": "Yellow Gold",
+                    "image": "https://images.pexels.com/photos/18451698/pexels-photo-18451698.jpeg",
+                    "description": "Classic warm hue. 18K is richer and softer; 14K is more durable.",
+                    "karats": [
+                        { "value": "14k", "label": "14K Yellow Gold" },
+                        {
+                            "value": "18k",
+                            "label": "18K Yellow Gold",
+                            "upgrade": true
+                        }
+                    ]
+                },
+                {
+                    "value": "roseGold",
+                    "label": "Rose Gold",
+                    "image": "https://images.pexels.com/photos/10475789/pexels-photo-10475789.jpeg",
+                    "description": "Romantic pink tone from copper alloy — trendy and flattering.",
+                    "karats": [
+                        { "value": "14k", "label": "14K Rose Gold" },
+                        {
+                            "value": "18k",
+                            "label": "18K Rose Gold",
+                            "upgrade": true
+                        }
+                    ]
+                },
+                {
+                    "value": "platinum",
+                    "label": "Platinum",
+                    "image": "https://images.pexels.com/photos/9953654/pexels-photo-9953654.jpeg",
+                    "description": "Naturally white, hypoallergenic, dense, and highly durable — the ultimate luxury metal."
+                }
+            ]
+        },
+
+        "origin": {
+            "title": "Choose diamond's origin",
+            "description": "They are both the same, Natural diamonds are formed deep within the Earth, while lab diamonds are created in a lab",
+            "options": [
+                {
+                    "value": "labGrown",
+                    "label": "Lab Grown",
+                    "icon": "https://images.pexels.com/photos/31677627/pexels-photo-31677627.jpeg",
+                    "description": "Lab-grown diamonds are created using advanced technology that replicates natural diamond formation.",
+                    "extra": {
+                        "title": "What is a Lab-Grown Diamond?",
+                        "content": "Lab-grown diamonds are produced in highly controlled environments using cutting-edge technology that mimics how diamonds form in nature."
+                    }
+                },
+                {
+                    "value": "natural",
+                    "label": "Natural",
+                    "icon": "https://images.pexels.com/photos/7347620/pexels-photo-7347620.jpeg",
+                    "description": "Natural diamonds are formed deep within the Earth over billions of years under intense heat and pressure.",
+                    "extra": {
+                        "title": "What is a Natural Diamond?",
+                        "content": "Natural diamonds have a long geological history, formed deep inside the Earth over billions of years."
+                    }
+                }
+            ]
+        },
+
+        "shape": {
+            "title": "Choose diamond's shape",
+            "options": [
+                {
+                    "value": "round",
+                    "label": "Round",
+                    "image": "https://images.pexels.com/photos/5370706/pexels-photo-5370706.jpeg"
+                },
+                {
+                    "value": "oval",
+                    "label": "Oval",
+                    "image": "https://images.pexels.com/photos/29107750/pexels-photo-29107750.jpeg"
+                },
+                {
+                    "value": "cushion",
+                    "label": "Cushion",
+                    "image": "https://images.pexels.com/photos/32988524/pexels-photo-32988524.jpeg"
+                },
+                {
+                    "value": "pear",
+                    "label": "Pear",
+                    "image": "https://images.pexels.com/photos/5370700/pexels-photo-5370700.jpeg"
+                },
+                {
+                    "value": "marquise",
+                    "label": "Marquise",
+                    "image": "https://images.pexels.com/photos/18451700/pexels-photo-18451700.jpeg"
+                },
+                {
+                    "value": "emerald",
+                    "label": "Emerald",
+                    "image": "https://images.pexels.com/photos/8398935/pexels-photo-8398935.jpeg"
+                },
+                {
+                    "value": "radiant",
+                    "label": "Radiant",
+                    "image": "https://images.pexels.com/photos/8398936/pexels-photo-8398936.jpeg"
+                },
+                {
+                    "value": "princess",
+                    "label": "Princess",
+                    "image": "https://images.pexels.com/photos/9953654/pexels-photo-9953654.jpeg"
+                },
+                {
+                    "value": "asscher",
+                    "label": "Asscher",
+                    "image": "https://images.pexels.com/photos/8891959/pexels-photo-8891959.jpeg"
+                },
+                {
+                    "value": "heart",
+                    "label": "Heart",
+                    "image": "https://images.pexels.com/photos/32988601/pexels-photo-32988601.jpeg"
+                }
+            ]
+        },
+
+        "budget": {
+            "title": "How much would you like to spend?",
+            "min": 1700,
+            "suggestions": [2000, 3500, 5000]
+        },
+
+        "priority": {
+            "title": "Find your match",
+            "options": [
+                {
+                    "value": "superHighQuality",
+                    "label": "Super High Quality",
+                    "description": "Colorless with superb cut, no visible imperfections with smaller carat size",
+                    "diamondImage": "https://images.pexels.com/photos/3715989/pexels-photo-3715989.jpeg",
+                    "specs": {
+                        "carat": "1.5",
+                        "color": "J",
+                        "clarity": "SI1",
+                        "ratio": "1.01"
+                    }
+                },
+                {
+                    "value": "balanced",
+                    "label": "Balanced Size & Quality",
+                    "description": "Almost colorless with great cut, no imperfections to the naked eye with medium carat size",
+                    "diamondImage": "https://images.pexels.com/photos/17486888/pexels-photo-17486888.jpeg",
+                    "highlight": true,
+                    "specs": {
+                        "carat": "1.5",
+                        "color": "J",
+                        "clarity": "SI1",
+                        "ratio": "1.01"
+                    }
+                },
+                {
+                    "value": "asBigAsPossible",
+                    "label": "As Big as Possible",
+                    "description": "Yellowish with great cut, small visible imperfections with big carat size",
+                    "diamondImage": "https://images.pexels.com/photos/9953654/pexels-photo-9953654.jpeg",
+                    "specs": {
+                        "carat": "1.5",
+                        "color": "J",
+                        "clarity": "SI1",
+                        "ratio": "1.01"
+                    }
+                }
+            ]
+        }
+    }
+}
