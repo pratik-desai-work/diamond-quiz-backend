@@ -1,0 +1,251 @@
+{
+    "success": true,
+    "quiz": {
+        "id": 1,
+        "title": "Diamond",
+        "subtitle": "QUIZ",
+        "description": "Answer a few simple questions and we’ll help you discover the diamond that fits you best.",
+        "ctaText": "Let’s start",
+        "note": "Takes less than 2 minutes",
+        "image": "https://images.pexels.com/photos/30852236/pexels-photo-30852236.jpeg",
+        "questions": [
+            {
+                "id": 1,
+                "order": 1,
+                "key": "settingStyle",
+                "title": "Choose the setting's style",
+                "type": "select",
+                "description": null,
+                "min": null,
+                "suggestions": null,
+                "active": true,
+                "options": [
+                    {
+                        "id": 1,
+                        "value": "solitaire",
+                        "label": "Solitaire",
+                        "image": "https://images.pexels.com/photos/9953654/pexels-photo-9953654.jpeg",
+                        "description": "A timeless single diamond elevated by delicate prongs.",
+                        "icon": null,
+                        "upgrade": null,
+                        "highlight": null,
+                        "diamondImage": null,
+                        "karats": null,
+                        "extra": null,
+                        "specs": null
+                    },
+                    {
+                        "id": 2,
+                        "value": "halo",
+                        "label": "Halo",
+                        "image": "https://images.pexels.com/photos/9953654/pexels-photo-9953654.jpeg",
+                        "description": "A sparkling circle of diamonds surrounds the center stone.",
+                        "icon": null,
+                        "upgrade": null,
+                        "highlight": null,
+                        "diamondImage": null,
+                        "karats": null,
+                        "extra": null,
+                        "specs": null
+                    },
+                    {
+                        "id": 7,
+                        "value": "natural",
+                        "label": "Natural",
+                        "image": "https://shopify-staged-uploads.storage.googleapis.com/tmp/78622916838/files/57019bbb-9f2a-4b20-a613-2222b57cbc77/Screenshot_2026-01-06_145429.png",
+                        "description": "",
+                        "icon": null,
+                        "upgrade": null,
+                        "highlight": null,
+                        "diamondImage": null,
+                        "karats": null,
+                        "extra": null,
+                        "specs": null
+                    }
+                ]
+            },
+            {
+                "id": 5,
+                "order": 2,
+                "key": "budget",
+                "title": "How much would you like to spend?",
+                "type": "budget",
+                "description": null,
+                "min": 1700,
+                "suggestions": [2000, 3500, 5000],
+                "active": false,
+                "options": [
+                    {
+                        "id": 9,
+                        "value": "3000",
+                        "label": "3000",
+                        "image": "",
+                        "description": "",
+                        "icon": null,
+                        "upgrade": null,
+                        "highlight": null,
+                        "diamondImage": null,
+                        "karats": null,
+                        "extra": null,
+                        "specs": null
+                    },
+                    {
+                        "id": 10,
+                        "value": "5000",
+                        "label": "5000",
+                        "image": "",
+                        "description": "",
+                        "icon": null,
+                        "upgrade": null,
+                        "highlight": null,
+                        "diamondImage": null,
+                        "karats": null,
+                        "extra": null,
+                        "specs": null
+                    }
+                ]
+            },
+            {
+                "id": 4,
+                "order": 3,
+                "key": "shape",
+                "title": "Choose diamond's shape",
+                "type": "select",
+                "description": null,
+                "min": null,
+                "suggestions": null,
+                "active": true,
+                "options": [
+                    {
+                        "id": 5,
+                        "value": "round",
+                        "label": "Round",
+                        "image": "https://shopify-staged-uploads.storage.googleapis.com/tmp/78622916838/files/584354e7-a4ad-4209-abd2-5b6d8f48bf75/Screenshot_2026-01-12_132002.png",
+                        "description": "",
+                        "icon": null,
+                        "upgrade": null,
+                        "highlight": null,
+                        "diamondImage": null,
+                        "karats": null,
+                        "extra": null,
+                        "specs": null
+                    }
+                ]
+            },
+            {
+                "id": 6,
+                "order": 4,
+                "key": "priority",
+                "title": "Find your match",
+                "type": "select",
+                "description": null,
+                "min": null,
+                "suggestions": null,
+                "active": true,
+                "options": [
+                    {
+                        "id": 6,
+                        "value": "superHighQuality",
+                        "label": "Super High Quality",
+                        "image": null,
+                        "description": "Colorless with superb cut, no visible imperfections with smaller carat size",
+                        "icon": null,
+                        "upgrade": null,
+                        "highlight": null,
+                        "diamondImage": "https://images.pexels.com/photos/3715989/pexels-photo-3715989.jpeg",
+                        "karats": null,
+                        "extra": null,
+                        "specs": {
+                            "carat": "1.5",
+                            "color": "J",
+                            "clarity": "SI1",
+                            "ratio": "1.01"
+                        }
+                    }
+                ]
+            },
+            {
+                "id": 2,
+                "order": 5,
+                "key": "metal",
+                "title": "Choose the metal",
+                "type": "select",
+                "description": null,
+                "min": null,
+                "suggestions": null,
+                "active": true,
+                "options": [
+                    {
+                        "id": 3,
+                        "value": "whiteGold",
+                        "label": "White Gold",
+                        "image": "https://images.pexels.com/photos/18451698/pexels-photo-18451698.jpeg",
+                        "description": "Modern, bright, and rhodium-plated for lasting shine.",
+                        "icon": null,
+                        "upgrade": null,
+                        "highlight": null,
+                        "diamondImage": null,
+                        "karats": [
+                            {
+                                "value": "14k",
+                                "label": "14K White Gold"
+                            },
+                            {
+                                "value": "18k",
+                                "label": "18K White Gold",
+                                "upgrade": true
+                            }
+                        ],
+                        "extra": null,
+                        "specs": null
+                    }
+                ]
+            },
+            {
+                "id": 3,
+                "order": 6,
+                "key": "origin",
+                "title": "Choose diamond's origin fdjfdfj",
+                "type": "select",
+                "description": "They are both the same, Natural diamonds are formed deep within the Earth, while lab diamonds are created in a lab",
+                "min": null,
+                "suggestions": null,
+                "active": true,
+                "options": [
+                    {
+                        "id": 4,
+                        "value": "labGrown",
+                        "label": "Lab Grown",
+                        "image": "https://shopify-staged-uploads.storage.googleapis.com/tmp/78622916838/files/d2693992-078f-42c7-9631-a22458c2e45d/Screenshot_2026-01-08_121052.png",
+                        "description": "Lab-grown diamonds are created using advanced technology that replicates natural diamond formation.",
+                        "icon": "https://images.pexels.com/photos/31677627/pexels-photo-31677627.jpeg",
+                        "upgrade": null,
+                        "highlight": null,
+                        "diamondImage": null,
+                        "karats": null,
+                        "extra": {
+                            "title": "What is a Lab-Grown Diamond?",
+                            "content": "Lab-grown diamonds are produced in highly controlled environments using cutting-edge technology that mimics how diamonds form in nature."
+                        },
+                        "specs": null
+                    },
+                    {
+                        "id": 11,
+                        "value": "natural",
+                        "label": "Natural",
+                        "image": "https://shopify-staged-uploads.storage.googleapis.com/tmp/78622916838/files/d829641b-b535-4309-b3c3-0c6f93387a95/Screenshot_2026-01-08_120653.png",
+                        "description": "Billions of years ago, deep within the Earth’s mantle, carbon transformed under immense heat and pressure into nature’s most extraordinary creation—a natural diamond. ",
+                        "icon": null,
+                        "upgrade": null,
+                        "highlight": null,
+                        "diamondImage": null,
+                        "karats": null,
+                        "extra": null,
+                        "specs": null
+                    }
+                ]
+            }
+        ]
+    },
+    "shop": "ashfaq-store-7075.myshopify.com"
+}
