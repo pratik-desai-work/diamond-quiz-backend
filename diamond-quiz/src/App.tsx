@@ -1,6 +1,4 @@
 import './App.css';
-import Quiz from './components/quiz/quiz';
-import DiamondRingSizer from './components/ring-selector/diamond_ring_sizer';
 import TestQuiz from './components/test-quiz/test_quiz';
 
 function App() {

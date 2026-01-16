@@ -28,6 +28,6 @@ redirect_urls = [ "https://example.com/api/auth" ]
 
 # newly added
 [app_proxy]
-prefix = "apps"
-subpath = "diamond-quiz"
 url = "/apps/diamond-quiz"
+subpath = "diamond-quiz"
+prefix = "apps"

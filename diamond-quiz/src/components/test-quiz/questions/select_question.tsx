@@ -27,7 +27,7 @@ const SelectQuestion: React.FC<Props> = ({ question, value, onChange }) => {
 
     if (!selected) return null;
 
-    const previewImage = selected.image || selected.diamondImage || null;
+    // const previewImage = selected.image || selected.diamondImage || null;
 
     return (
         <div className="w-full max-w-3xl mx-auto text-center ">
@@ -64,11 +64,10 @@ const SelectQuestion: React.FC<Props> = ({ question, value, onChange }) => {
                                     setSelected(opt);
                                     onChange(opt.value);
                                 }}
-                                className={`relative w-full rounded-xl border-3 overflow-hidden shadow-xl transition ${
-                                    isActive
-                                        ? ' border-primary'
-                                        : ' border-gray-200 hover:border-primary/30'
-                                }`}
+                                className={`relative w-full rounded-xl border-3 overflow-hidden shadow-xl transition ${isActive
+                                    ? ' border-primary'
+                                    : ' border-gray-200 hover:border-primary/30'
+                                    }`}
                             >
                                 {thumb ? (
                                     <div className=" w-full h-52 rounded-lg overflow-hidden">

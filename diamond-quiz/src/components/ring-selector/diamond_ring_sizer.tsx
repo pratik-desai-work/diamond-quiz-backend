@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
-import handImage from '../../assets/hand.jpg';
 import diamondImage from '../../assets/diamond.png';
+import handImage from '../../assets/hand.jpg';
 
 const DIAMOND_SIZES = [
     { label: 'XS', scale: 0.7 },
@@ -49,11 +49,10 @@ export default function DiamondRingSizer() {
                             key={size.label}
                             onClick={() => setSelectedSize(size)}
                             className={`px-4 py-2 rounded-full border text-sm font-medium transition
-                ${
-                    isActive
-                        ? 'bg-black text-white border-black'
-                        : 'bg-white text-gray-700 border-gray-300 hover:border-black'
-                }
+                ${isActive
+                                    ? 'bg-black text-white border-black'
+                                    : 'bg-white text-gray-700 border-gray-300 hover:border-black'
+                                }
               `}
                         >
                             {size.label}

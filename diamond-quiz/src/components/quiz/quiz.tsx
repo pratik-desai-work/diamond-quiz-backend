@@ -4,12 +4,12 @@ import { quizData } from '../../data/quiz_data';
 import QuestionWrapper from './question_wrapper';
 import QuizIntro from './quiz_intro';
 
-import SettingStyleQuestion from './questions/setting_style_question';
+import BudgetQuestion from './questions/budget_question';
 import MetalQuestion from './questions/metal_question';
 import OriginQuestion from './questions/origin_questions';
-import ShapeQuestion from './questions/shape_questions';
-import BudgetQuestion from './questions/budget_question';
 import PriorityQuestion from './questions/priority_question';
+import SettingStyleQuestion from './questions/setting_style_question';
+import ShapeQuestion from './questions/shape_questions';
 
 const Quiz = () => {
     const [hasStarted, setHasStarted] = useState(false); // 👈 NEW
